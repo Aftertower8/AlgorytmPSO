@@ -14,9 +14,11 @@ typedef struct {
     position current_position;
     position velocity;
     coordinates best_position;
+    double vmax;
     double best_val;
     double trust;
     double random_val; //zakres <0;1>, element stochastyczny
+    double weight;
 } particle; //bedzie zrobiona tablica czasteczek(particle) - rozmiar podany przez uzytkownika
 
 typedef struct {
