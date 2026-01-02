@@ -25,6 +25,7 @@ coordinates PSO(int **matrix, int X, int Y, int ilosc){
             roj.best_position = max_swarm_signal(matrix,dron[j],roj);
         }
     }
+    return roj.best_position;
     free(dron);
 }
 
