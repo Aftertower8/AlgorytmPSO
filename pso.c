@@ -1,15 +1,19 @@
 #include "pso.h"
 #include <stdlib.h>
 #include <time.h>
-const int ITERACJE = 500; //roboczo
-const double k=0.1; //procent przestrzeni
+//gdzies tu trzeba bedzie wczytac logger
+const int ITERACJE = 500; //wstepnie, pozniej mozna sprawic aby uzytkownik podawal ilosc iteracji
+const double k=0.1; //procent przestrzeni, czyli czasteczka moze przejsc max 10% planszy w ciagu jednej iteracji (w jednej osi)
 static double vmax_x=1;
 static double vmax_y=1;
 
 void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zakres_y, int **matrix);
-void max_signal(int **matrix, particle *dron, swarm *roj);
 position new_particle_velocity(particle dron, swarm roj);
 position new_particle_position(particle dron);
+coordinates max_particle_signal(int **matrix, particle dron);
+coordinates max_swarm_signal(int **matrix, particle dron, swarm roj);
+double max_val_particle(int **matrix, particle dron);
+double max_val_swarm(int **matrix, swarm roj);
 double stochastic_elem();
 
 coordinates PSO(int **matrix, int X, int Y, int ilosc){
@@ -23,6 +27,11 @@ coordinates PSO(int **matrix, int X, int Y, int ilosc){
             dron[j].current_position = new_particle_position(dron[j]);
             dron[j].best_position = max_particle_signal(matrix,dron[j]);
             roj.best_position = max_swarm_signal(matrix,dron[j],roj);
+            dron[j].best_val=max_val_particle(matrix,dron[j]);
+            roj.best_val = max_val_swarm(matrix,roj);\
+            /*
+            Gdzies tutaj dodamy funkcje z loggera zeby wypisywal cale to info do osobnego pliku tekstowego
+            */
         }
     }
     return roj.best_position;
@@ -60,6 +69,10 @@ coordinates max_particle_signal(int **matrix, particle dron){
         return dron.best_position;
 }
 
+double max_val_particle(int **matrix, particle dron){
+    return matrix[dron.best_position.x][dron.best_position.y];
+}
+
 coordinates max_swarm_signal(int **matrix, particle dron, swarm roj){
     coordinates new_swarm_best;
     if(matrix[dron.best_position.x][dron.best_position.y]>=matrix[roj.best_position.x][roj.best_position.y]){
@@ -69,6 +82,10 @@ coordinates max_swarm_signal(int **matrix, particle dron, swarm roj){
     }
     else
         return roj.best_position;
+}
+
+double max_val_swarm(int **matrix, swarm roj){
+    return matrix[roj.best_position.x][roj.best_position.y];
 }
 
 position new_particle_velocity(particle dron, swarm roj){
