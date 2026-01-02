@@ -14,11 +14,16 @@ typedef struct {
     position current_position;
     position velocity;
     coordinates best_position;
+    double best_val;
+    double trust;
+    double random_val; //zakres <0;1>, element stochastyczny
 } particle; //bedzie zrobiona tablica czasteczek(particle) - rozmiar podany przez uzytkownika
-//wektor kierunku to suma 3 wektorow: aktualnego kierunku, najlepszej pozycji czasteczki, najlepszej pozycji roju
 
 typedef struct {
     coordinates best_position;
+    double best_val;
+    double trust;
+    double random_val;
 } swarm;
 
 coordinates PSO(int **matrix, int X, int Y, int ilosc);

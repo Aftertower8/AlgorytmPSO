@@ -5,8 +5,8 @@
 coordinates PSO(int **matrix, int X, int Y, int ilosc){
     particle *dron = (particle*)malloc(ilosc * sizeof(particle));
     swarm roj;
-    init_particles(dron,&roj,ilosc,X,Y,matrix);
     srand(time(NULL));
+    init_particles(dron,&roj,ilosc,X,Y,matrix);
 }
 
 void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zakres_y, int **matrix){
