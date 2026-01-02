@@ -14,7 +14,6 @@ typedef struct {
     position current_position;
     position velocity;
     coordinates best_position;
-    double vmax;
     double best_val;
     double trust;
     double weight;
