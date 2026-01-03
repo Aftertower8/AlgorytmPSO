@@ -34,8 +34,8 @@ coordinates PSO(int **matrix, int X, int Y, int ilosc){
             */
         }
     }
-    return roj.best_position;
     free(dron);
+    return roj.best_position;
 }
 
 void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zakres_y, int **matrix){
