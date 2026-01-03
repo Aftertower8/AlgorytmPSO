@@ -28,7 +28,7 @@ coordinates PSO(int **matrix, int X, int Y, int ilosc){
             dron[j].best_position = max_particle_signal(matrix,dron[j]);
             roj.best_position = max_swarm_signal(matrix,dron[j],roj);
             dron[j].best_val=max_val_particle(matrix,dron[j]);
-            roj.best_val = max_val_swarm(matrix,roj);\
+            roj.best_val = max_val_swarm(matrix,roj);
             /*
             Gdzies tutaj dodamy funkcje z loggera zeby wypisywal cale to info do osobnego pliku tekstowego
             */
