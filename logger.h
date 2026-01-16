@@ -5,7 +5,7 @@
 
 void logger_init(const char *filename);
 
-void log_swarm(const char *filename, int iteration, particle *drones, int count);
+void log_swarm(const char *filename, int iteration, int id, particle *drones);
 
 #endif
 
