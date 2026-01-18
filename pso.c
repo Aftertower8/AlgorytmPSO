@@ -1,44 +1,41 @@
 #include "pso.h"
 #include <stdlib.h>
 #include <time.h>
-//gdzies tu trzeba bedzie wczytac logger
-const int ITERACJE = 500; //wstepnie, pozniej mozna sprawic aby uzytkownik podawal ilosc iteracji
 const double k=0.1; //procent przestrzeni, czyli czasteczka moze przejsc max 10% planszy w ciagu jednej iteracji (w jednej osi)
 static double vmax_x=1;
 static double vmax_y=1;
+//zeby zainicjowac struktury wywolac init_particles(...)
+//pozniej w petli w main dla kazdej iteracji wywolywac PSO(...) - przesuniecie czastek o jedna iteracje
 
 void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zakres_y, int **matrix);
+void free_particles(particle *dron);
 position new_particle_velocity(particle dron, swarm roj);
 position new_particle_position(particle dron);
 coordinates max_particle_signal(int **matrix, particle dron);
 coordinates max_swarm_signal(int **matrix, particle dron, swarm roj);
 double max_val_particle(int **matrix, particle dron);
 double max_val_swarm(int **matrix, swarm roj);
+int is_inside_map(position p, int X, int Y);
 double stochastic_elem();
 
-coordinates PSO(int **matrix, int X, int Y, int ilosc){
-    particle *dron = (particle*)malloc(ilosc * sizeof(particle));
-    swarm roj;
-    srand(time(NULL));
-    init_particles(dron,&roj,ilosc,X,Y,matrix);
-    for(int i=0;i<ITERACJE;i++){
+coordinates PSO(int **matrix, particle *dron, swarm *roj, int X, int Y, int ilosc){
         for(int j=0;j<ilosc;j++){
-            dron[j].velocity = new_particle_velocity(dron[j],roj);
+            dron[j].velocity = new_particle_velocity(dron[j],*roj);
             dron[j].current_position = new_particle_position(dron[j]);
-            dron[j].best_position = max_particle_signal(matrix,dron[j]);
-            roj.best_position = max_swarm_signal(matrix,dron[j],roj);
-            dron[j].best_val=max_val_particle(matrix,dron[j]);
-            roj.best_val = max_val_swarm(matrix,roj);
-            /*
-            Gdzies tutaj dodamy funkcje z loggera zeby wypisywal cale to info do osobnego pliku tekstowego
-            */
+            if(is_inside_map(dron[j].current_position,X,Y)){
+                dron[j].best_position = max_particle_signal(matrix,dron[j]);
+                roj->best_position = max_swarm_signal(matrix,dron[j],*roj);
+                dron[j].best_val=max_val_particle(matrix,dron[j]);
+                roj->best_val = max_val_swarm(matrix,*roj);
+            }
         }
-    }
-    free(dron);
-    return roj.best_position;
+    return roj->best_position;
 }
 
 void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zakres_y, int **matrix){
+    srand(time(NULL));
+    dron = (particle*)malloc(ilosc*sizeof(particle));
+    swarm roj;
     vmax_x = k*zakres_x;
     vmax_y = k*zakres_y;
     roj->trust = 1.0;
@@ -57,6 +54,11 @@ void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zak
     }
     
 }
+
+int is_inside_map(position p, int X, int Y){
+    return (p.x >= 0 && p.x < X && p.y >= 0 && p.y < Y);
+}
+
 
 coordinates max_particle_signal(int **matrix, particle dron){
     coordinates new_particle_best;
@@ -114,4 +116,8 @@ position new_particle_position(particle dron){
 
 double stochastic_elem(){
     return rand() / (double)RAND_MAX;
+}
+
+void free_particles(particle *dron){
+    free(dron);
 }
