@@ -11,14 +11,14 @@ void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zak
 void free_particles(particle *dron);
 position new_particle_velocity(particle dron, swarm roj);
 position new_particle_position(particle dron);
-coordinates max_particle_signal(int **matrix, particle dron);
-coordinates max_swarm_signal(int **matrix, particle dron, swarm roj);
-double max_val_particle(int **matrix, particle dron);
-double max_val_swarm(int **matrix, swarm roj);
+coordinates max_particle_signal(double **matrix, particle dron);
+coordinates max_swarm_signal(double **matrix, particle dron, swarm roj);
+double max_val_particle(double **matrix, particle dron);
+double max_val_swarm(double **matrix, swarm roj);
 int is_inside_map(position p, int X, int Y);
 double stochastic_elem();
 
-coordinates PSO(int **matrix, particle *dron, swarm *roj, int X, int Y, int ilosc){
+coordinates PSO(double **matrix, particle *dron, swarm *roj, int X, int Y, int ilosc){
         for(int j=0;j<ilosc;j++){
             dron[j].velocity = new_particle_velocity(dron[j],*roj);
             dron[j].current_position = new_particle_position(dron[j]);
@@ -57,7 +57,7 @@ int is_inside_map(position p, int X, int Y){
 }
 
 
-coordinates max_particle_signal(int **matrix, particle dron){
+coordinates max_particle_signal(double **matrix, particle dron){
     coordinates new_particle_best;
     if(matrix[(int)dron.current_position.x][(int)dron.current_position.y]>=matrix[(int)dron.best_position.x][(int)dron.best_position.y]){
         new_particle_best.x=(int)dron.current_position.x;
@@ -68,11 +68,11 @@ coordinates max_particle_signal(int **matrix, particle dron){
         return dron.best_position;
 }
 
-double max_val_particle(int **matrix, particle dron){
+double max_val_particle(double **matrix, particle dron){
     return matrix[dron.best_position.x][dron.best_position.y];
 }
 
-coordinates max_swarm_signal(int **matrix, particle dron, swarm roj){
+coordinates max_swarm_signal(double **matrix, particle dron, swarm roj){
     coordinates new_swarm_best;
     if(matrix[dron.best_position.x][dron.best_position.y]>=matrix[roj.best_position.x][roj.best_position.y]){
         new_swarm_best.x=(int)dron.best_position.x;
@@ -83,7 +83,7 @@ coordinates max_swarm_signal(int **matrix, particle dron, swarm roj){
         return roj.best_position;
 }
 
-double max_val_swarm(int **matrix, swarm roj){
+double max_val_swarm(double **matrix, swarm roj){
     return matrix[roj.best_position.x][roj.best_position.y];
 }
 
