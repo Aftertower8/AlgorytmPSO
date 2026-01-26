@@ -25,5 +25,5 @@ typedef struct {
     double trust;
 } swarm;
 
-coordinates PSO(int **matrix, int X, int Y, int ilosc);
+coordinates PSO(double **matrix, particle *dron, swarm *roj, int X, int Y, int ilosc);
 #endif
