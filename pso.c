@@ -33,9 +33,6 @@ coordinates PSO(int **matrix, particle *dron, swarm *roj, int X, int Y, int ilos
 }
 
 void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zakres_y, int **matrix){
-    srand(time(NULL));
-    dron = (particle*)malloc(ilosc*sizeof(particle));
-    swarm roj;
     vmax_x = k*zakres_x;
     vmax_y = k*zakres_y;
     roj->trust = 1.0;
@@ -52,7 +49,7 @@ void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zak
         dron[i].trust = 0.9;
         dron[i].weight = 0.5;
     }
-    
+    roj->best_val = max_val_swarm(matrix, *roj);
 }
 
 int is_inside_map(position p, int X, int Y){
