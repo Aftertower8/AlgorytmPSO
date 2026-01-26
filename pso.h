@@ -24,6 +24,8 @@ typedef struct {
     double best_val;
     double trust;
 } swarm;
-
+void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zakres_y, double **matrix);
+void free_particles(particle *dron);
 coordinates PSO(double **matrix, particle *dron, swarm *roj, int X, int Y, int ilosc);
+
 #endif

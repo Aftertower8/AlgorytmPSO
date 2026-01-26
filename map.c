@@ -2,7 +2,7 @@
 #include "map.h"
 double** ReadFromFile(FILE *in, int *W, int *H){
     
-    if(fscanf(in,"%d%d",&W,&H) !=2) return NULL;
+    if(fscanf(in,"%d%d",W,H) !=2) return NULL;
     int rzedy = *H;
     int kolumny = *W;
 
@@ -16,7 +16,7 @@ double** ReadFromFile(FILE *in, int *W, int *H){
     return matrix;
 }
 
-void free_matrix(int **matrix, int H){
+void free_matrix(double **matrix, int H){
     for(int i=0;i<H;i++){
         free(matrix[i]);
     }
