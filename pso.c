@@ -1,13 +1,13 @@
 #include "pso.h"
 #include <stdlib.h>
 #include <time.h>
-const double k=0.1; //procent przestrzeni, czyli czasteczka moze przejsc max 10% planszy w ciagu jednej iteracji (w jednej osi)
+
+const double k=0.1; 
 static double vmax_x=1;
 static double vmax_y=1;
-//zeby zainicjowac struktury wywolac init_particles(...)
-//pozniej w petli w main dla kazdej iteracji wywolywac PSO(...) - przesuniecie czastek o jedna iteracje
 
-void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zakres_y, int **matrix);
+// Prototypy z poprawionym typem double **
+void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zakres_y, double **matrix);
 void free_particles(particle *dron);
 position new_particle_velocity(particle dron, swarm roj);
 position new_particle_position(particle dron);
@@ -18,50 +18,70 @@ double max_val_swarm(double **matrix, swarm roj);
 int is_inside_map(position p, int X, int Y);
 double stochastic_elem();
 
+
+
 coordinates PSO(double **matrix, particle *dron, swarm *roj, int X, int Y, int ilosc){
-        for(int j=0;j<ilosc;j++){
-            dron[j].velocity = new_particle_velocity(dron[j],*roj);
-            dron[j].current_position = new_particle_position(dron[j]);
-            if(is_inside_map(dron[j].current_position,X,Y)){
-                dron[j].best_position = max_particle_signal(matrix,dron[j]);
-                roj->best_position = max_swarm_signal(matrix,dron[j],*roj);
-                dron[j].best_val=max_val_particle(matrix,dron[j]);
-                roj->best_val = max_val_swarm(matrix,*roj);
+    for(int j=0; j<ilosc; j++){
+        dron[j].velocity = new_particle_velocity(dron[j], *roj); 
+        dron[j].current_position = new_particle_position(dron[j]); 
+        
+        if(is_inside_map(dron[j].current_position, X, Y)){ 
+            dron[j].best_position = max_particle_signal(matrix, dron[j]); 
+            // Aktualizacja pBest_val dla czastki
+            dron[j].best_val = max_val_particle(matrix, dron[j]); 
+            
+            // Sprawdzenie i aktualizacja gBest dla calego roju
+            if(dron[j].best_val > roj->best_val) { 
+                roj->best_val = dron[j].best_val;
+                roj->best_position = dron[j].best_position;
             }
         }
-    return roj->best_position;
+    }
+    return roj->best_position; 
 }
 
-void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zakres_y, int **matrix){
-    vmax_x = k*zakres_x;
-    vmax_y = k*zakres_y;
-    roj->trust = 1.0;
-    roj->best_position.x=0;  //zainicjowanie roj.best_position
-    roj->best_position.y=0;
-    for(int i=0;i<ilosc;i++){
-        dron[i].current_position.x = rand() % zakres_x;
+void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zakres_y, double **matrix){
+    vmax_x = k * zakres_x;
+    vmax_y = k * zakres_y;
+    
+    roj->trust = 1.0; 
+    roj->best_position.x = 0;
+    roj->best_position.y = 0;
+    roj->best_val = -1e9; // Startowa bardzo mala wartosc sygnallu
+
+    for(int i=0; i<ilosc; i++){
+        dron[i].current_position.x = rand() % zakres_x; 
         dron[i].current_position.y = rand() % zakres_y;
-        dron[i].best_position.x=dron[i].current_position.x;
-        dron[i].best_position.y=dron[i].current_position.y;
-        roj->best_position = max_swarm_signal(matrix,dron[i],*roj);
-        dron[i].velocity.x = -vmax_x + (2.0 * vmax_x * rand() / (double)RAND_MAX);
+        dron[i].best_position.x = (int)dron[i].current_position.x;
+        dron[i].best_position.y = (int)dron[i].current_position.y;
+        
+        // Pobranie wartosci startowej pBest_val
+        dron[i].best_val = matrix[(int)dron[i].best_position.y][(int)dron[i].best_position.x];
+
+        dron[i].velocity.x = -vmax_x + (2.0 * vmax_x * rand() / (double)RAND_MAX); 
         dron[i].velocity.y = -vmax_y + (2.0 * vmax_y * rand() / (double)RAND_MAX);
-        dron[i].trust = 0.9;
-        dron[i].weight = 0.5;
+        
+        dron[i].trust = 0.9; 
+        dron[i].weight = 0.5; 
+
+        // Wstepna aktualizacja gBest roju
+        if(dron[i].best_val > roj->best_val) {
+            roj->best_val = dron[i].best_val;
+            roj->best_position = dron[i].best_position;
+        }
     }
-    roj->best_val = max_val_swarm(matrix, *roj);
 }
 
 int is_inside_map(position p, int X, int Y){
-    return (p.x >= 0 && p.x < X && p.y >= 0 && p.y < Y);
+    return (p.x >= 0 && p.x < X && p.y >= 0 && p.y < Y); 
 }
-
 
 coordinates max_particle_signal(double **matrix, particle dron){
     coordinates new_particle_best;
-    if(matrix[(int)dron.current_position.x][(int)dron.current_position.y]>=matrix[(int)dron.best_position.x][(int)dron.best_position.y]){
-        new_particle_best.x=(int)dron.current_position.x;
-        new_particle_best.y=(int)dron.current_position.y;
+    // Zamiana [x][y] na [y][x]
+    if(matrix[(int)dron.current_position.y][(int)dron.current_position.x] >= matrix[dron.best_position.y][dron.best_position.x]){ 
+        new_particle_best.x = (int)dron.current_position.x;
+        new_particle_best.y = (int)dron.current_position.y;
         return new_particle_best;
     }
     else
@@ -69,14 +89,16 @@ coordinates max_particle_signal(double **matrix, particle dron){
 }
 
 double max_val_particle(double **matrix, particle dron){
-    return matrix[dron.best_position.x][dron.best_position.y];
+    // Zamiana [x][y] na [y][x]
+    return matrix[dron.best_position.y][dron.best_position.x]; 
 }
 
 coordinates max_swarm_signal(double **matrix, particle dron, swarm roj){
     coordinates new_swarm_best;
-    if(matrix[dron.best_position.x][dron.best_position.y]>=matrix[roj.best_position.x][roj.best_position.y]){
-        new_swarm_best.x=(int)dron.best_position.x;
-        new_swarm_best.y=(int)dron.best_position.y;
+    // Zamiana [x][y] na [y][x]
+    if(matrix[dron.best_position.y][dron.best_position.x] >= matrix[roj.best_position.y][roj.best_position.x]){ 
+        new_swarm_best.x = (int)dron.best_position.x;
+        new_swarm_best.y = (int)dron.best_position.y;
         return new_swarm_best;
     }
     else
@@ -84,37 +106,37 @@ coordinates max_swarm_signal(double **matrix, particle dron, swarm roj){
 }
 
 double max_val_swarm(double **matrix, swarm roj){
-    return matrix[roj.best_position.x][roj.best_position.y];
+    // Zamiana [x][y] na [y][x]
+    return matrix[roj.best_position.y][roj.best_position.x]; 
 }
 
 position new_particle_velocity(particle dron, swarm roj){
     position new_velocity;
-    double r1=stochastic_elem();
-    double r2=stochastic_elem();
-    new_velocity.x = dron.weight*dron.velocity.x + dron.trust*r1 * (dron.best_position.x - dron.current_position.x) + roj.trust*r2 * (roj.best_position.x - dron.current_position.x);
+    double r1 = stochastic_elem(); 
+    double r2 = stochastic_elem();
+    
+    new_velocity.x = dron.weight*dron.velocity.x + dron.trust*r1 * (dron.best_position.x - dron.current_position.x) + roj.trust*r2 * (roj.best_position.x - dron.current_position.x); 
     new_velocity.y = dron.weight*dron.velocity.y + dron.trust*r1 * (dron.best_position.y - dron.current_position.y) + roj.trust*r2 * (roj.best_position.y - dron.current_position.y);
-    if(new_velocity.x>vmax_x)
-        new_velocity.x=vmax_x;
-    if(new_velocity.x<-vmax_x)
-        new_velocity.x=-vmax_x;
-    if(new_velocity.y>vmax_y)
-        new_velocity.y=vmax_y;
-    if(new_velocity.y<-vmax_y)
-        new_velocity.y=-vmax_y;
+    
+    if(new_velocity.x > vmax_x) new_velocity.x = vmax_x;
+    if(new_velocity.x < -vmax_x) new_velocity.x = -vmax_x;
+    if(new_velocity.y > vmax_y) new_velocity.y = vmax_y;
+    if(new_velocity.y < -vmax_y) new_velocity.y = -vmax_y;
+    
     return new_velocity;
 }
 
 position new_particle_position(particle dron){
     position new_position;
-    new_position.x = dron.current_position.x + dron.velocity.x;
+    new_position.x = dron.current_position.x + dron.velocity.x; 
     new_position.y = dron.current_position.y + dron.velocity.y;
     return new_position;
 }
 
 double stochastic_elem(){
-    return rand() / (double)RAND_MAX;
+    return rand() / (double)RAND_MAX; 
 }
 
 void free_particles(particle *dron){
-    free(dron);
+    free(dron); 
 }
