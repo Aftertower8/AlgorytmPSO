@@ -6,6 +6,13 @@
 #include "pso.h"
 #include "logger.h"
 
+void read_config(FILE* config, particle *drones, swarm *roj, int particle_count){
+    double attrib[5];   //w,c1,r1,c2,r2
+    int i=0;
+    while(fscanf(config,"%lf",&attrib[i++])==1);
+    get_attrib(attrib,drones,roj,particle_count);
+}
+
 int main(int argc, char *argv[]) {
     char *map_file = NULL;
     char *config_file = NULL; 
@@ -34,8 +41,15 @@ int main(int argc, char *argv[]) {
     // Wczytanie mapy
     FILE *f_map = fopen(map_file, "r");
     if (!f_map) {
-        perror("Blad otwarcia pliku mapy");
+        perror("Blad otwarcia pliku mapy\n");
         return 1;
+    }
+
+    // Wczytanie pliku config
+    FILE *config = fopen(config_file, "r");
+    if(!config){
+        perror("Blad otwarcia pliku konfiguracyjnego\n");
+        return 2;
     }
 
     int W, H;
@@ -44,7 +58,7 @@ int main(int argc, char *argv[]) {
     fclose(f_map);
 
     if (map == NULL) {
-        fprintf(stderr, "Blad wczytywania mapy.\n");
+        perror("Blad wczytywania mapy.\n");
         return 1;
     }
 
@@ -54,6 +68,8 @@ int main(int argc, char *argv[]) {
 
     // Inicjalizacja stanu początkowego roju
     init_particles(drones, &roj, particle_count, W, H, map);
+    
+    read_config(config,drones,&roj,particle_count);
 
     if (log_interval > 0) {
         logger_init("pso_log.csv");

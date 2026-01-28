@@ -1,5 +1,6 @@
 #ifndef PSO_H
 #define PSO_H
+
 typedef struct {
     int x;
     int y;
@@ -27,5 +28,6 @@ typedef struct {
 void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zakres_y, double **matrix);
 void free_particles(particle *dron);
 coordinates PSO(double **matrix, particle *dron, swarm *roj, int X, int Y, int ilosc);
+void get_attrib(double *attrib, particle *dron, swarm *roj, int particle_count);
 
 #endif

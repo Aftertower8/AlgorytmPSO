@@ -5,6 +5,8 @@
 const double k=0.1; 
 static double vmax_x=1;
 static double vmax_y=1;
+double r1,r2;
+int r_set=0;
 
 // Prototypy z poprawionym typem double **
 void init_particles(particle *dron, swarm *roj, int ilosc, int zakres_x, int zakres_y, double **matrix);
@@ -18,7 +20,16 @@ double max_val_swarm(double **matrix, swarm roj);
 int is_inside_map(position p, int X, int Y);
 double stochastic_elem();
 
-
+void get_attrib(double *attrib, particle *dron, swarm *roj, int particle_count){
+    for(int i=0;i<particle_count;i++){
+        dron[i].weight = attrib[0];
+        dron[i].trust = attrib[1];
+    }
+    roj->trust = attrib[3];
+    r1 = attrib[2];
+    r2 = attrib[4];
+    r_set=1;    
+}
 
 coordinates PSO(double **matrix, particle *dron, swarm *roj, int X, int Y, int ilosc){
     for(int j=0; j<ilosc; j++){
@@ -112,9 +123,10 @@ double max_val_swarm(double **matrix, swarm roj){
 
 position new_particle_velocity(particle dron, swarm roj){
     position new_velocity;
-    double r1 = stochastic_elem(); 
-    double r2 = stochastic_elem();
-    
+    if(r_set!=0){
+        r1 = stochastic_elem(); 
+        r2 = stochastic_elem();
+    }
     new_velocity.x = dron.weight*dron.velocity.x + dron.trust*r1 * (dron.best_position.x - dron.current_position.x) + roj.trust*r2 * (roj.best_position.x - dron.current_position.x); 
     new_velocity.y = dron.weight*dron.velocity.y + dron.trust*r1 * (dron.best_position.y - dron.current_position.y) + roj.trust*r2 * (roj.best_position.y - dron.current_position.y);
     
