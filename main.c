@@ -8,8 +8,12 @@
 
 void read_config(FILE* config, particle *drones, swarm *roj, int particle_count){
     double attrib[5];   //w,c1,r1,c2,r2
-    int i=0;
-    while(fscanf(config,"%lf",&attrib[i++])==1);
+    int ile =0;
+    while( ile < 5 && fscanf(config,"%lf",&attrib[ile])==1);
+    ile++;
+    if( ile < 5){
+        fprintf(stderr, "Ostrzezenie: Niepelny plik CONFIG. Uzywam czesciowych danych.\n");
+    }
     get_attrib(attrib,drones,roj,particle_count);
 }
 
@@ -29,12 +33,27 @@ int main(int argc, char *argv[]) {
     for (int i = 2; i < argc; i++) {
         if (strcmp(argv[i], "-p") == 0 && i + 1 < argc) {
             particle_count = atoi(argv[++i]);
+            if(particle_count <=0){
+                fprintf(stderr, "Blad: Liczba czastek musi być dodatnia.\n");
+                return 1;
+            }
         } else if (strcmp(argv[i], "-i") == 0 && i + 1 < argc) {
             iterations = atoi(argv[++i]);
+            if(iterations <=0){
+            fprintf(stderr, "Blad: Liczba iteracji musi być liczba dodatnia.\n");
+            return 1;}
         } else if (strcmp(argv[i], "-c") == 0 && i + 1 < argc) {
             config_file = argv[++i];
         } else if (strcmp(argv[i], "-n") == 0 && i + 1 < argc) {
+            if(argv[i+1][0] < '0' || argv[i+1][0] > '9'){
+                fprintf(stderr, "Blad: Argument po -n musi byc liczba calkowita.\n");
+                return 1;
+            }
             log_interval = atoi(argv[++i]);
+            if(log_interval <0){
+                fprintf(stderr, "Blad: Log_interval nie moze byc ujemny.\n");
+                return 1;
+            }
         }
     }
 
@@ -45,7 +64,7 @@ int main(int argc, char *argv[]) {
 
     FILE *f_map = fopen(map_file, "r");
     if (!f_map) {
-        perror("Blad otwarcia pliku mapy\n");
+        perror("Blad otwarcia pliku mapy");
         return 1;
     }
 
@@ -54,7 +73,7 @@ int main(int argc, char *argv[]) {
     if(config_flag==1){
         config = fopen(config_file, "r");
         if(!config){
-	        perror("Blad wczytywania pliku config\n");
+	        perror("Blad wczytywania pliku config");
             return 1;
         }
     }
@@ -64,7 +83,7 @@ int main(int argc, char *argv[]) {
     fclose(f_map);
 
     if (map == NULL) {
-        perror("Blad wczytywania mapy.\n");
+        perror("Blad wczytywania mapy.");
         return 1;
     }
 
