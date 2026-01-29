@@ -39,6 +39,10 @@ int main(int argc, char *argv[]) {
     }
 
     // Wczytanie mapy
+    int config_flag=1;
+    if(config_file==NULL)
+        config_flag=0;
+
     FILE *f_map = fopen(map_file, "r");
     if (!f_map) {
         perror("Blad otwarcia pliku mapy\n");
@@ -46,12 +50,14 @@ int main(int argc, char *argv[]) {
     }
 
     // Wczytanie pliku config
-    FILE *config = fopen(config_file, "r");
-    if(!config){
-        perror("Blad otwarcia pliku konfiguracyjnego\n");
-        return 2;
+    FILE *config;
+    if(config_flag==1){
+        config = fopen(config_file, "r");
+        if(!config){
+	        perror("Blad wczytywania pliku config\n");
+            return 1;
+        }
     }
-
     int W, H;
     // Wczytaniex mapy oraz jej wymiary (W, H) przez wskaźniki
     double **map = ReadFromFile(f_map, &W, &H);
@@ -68,8 +74,10 @@ int main(int argc, char *argv[]) {
 
     // Inicjalizacja stanu początkowego roju
     init_particles(drones, &roj, particle_count, W, H, map);
-    
-    read_config(config,drones,&roj,particle_count);
+    if(config_flag==1){
+        read_config(config,drones,&roj,particle_count);
+        fclose(config);
+    }
 
     if (log_interval > 0) {
         logger_init("pso_log.csv");
